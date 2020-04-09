@@ -15,10 +15,10 @@
         .grid-caption {{ header.text }}
         table
           tr(v-for="row in getGridMapData()")
-            template(v-for="data in row")
-              td(:style="getCellStyle(data, header.value)")
-                .place {{ data.place }}
-                .value {{ getValue(data, header.value) }}
+            template(v-for="city in row")
+              td(:style="getCellStyle(city.data, header.value)" :rowspan="city.rowspan ? city.rowspan : 1" :colspan="city.colspan ? city.colspan : 1")
+                .place {{ city.name }}
+                .value {{ getValue(city.data, header.value) }}
     .credit
       | Credit
       .project-home APP: 
@@ -44,22 +44,27 @@
 
 import axios from "axios"
 import populations from "./populations.json"
+import landarea from "./landarea.json"
+import map from "./map.json"
 const csvSync = require('csv-parse/lib/sync')
 
 export default {
   data () {
     return {
-      //sourceUrl: 'https://www.pref.fukui.lg.jp/doc/toukei-jouhou/opendata/list_3_d/fil/covid19_patients.csv',
+      //sourceUrl: 'https://www.pref.fukui.lg.jp/doc/toukei-jouhou/covid-19_d/fil/covid19_patients.csv',
       sourceUrl: "https://covid19jp-patients.s3-ap-northeast-1.amazonaws.com/fukui.csv",// ↑がCORSポリシー違反で取れなかったのでミラーを立てた
       sortBy: 'totalPatients',
       sortDesc: true,
       tableHeaders: [
         { text: "市町村", value: "place", width: "90px", sortable: false },
         { text: "累計感染者数", value: "totalPatients" },
-        { text: "10万人あたりの累計感染者数", value: "totalPatientsPerPop", sort: (a, b) => (Number(a) - Number(b)) }
+        { text: "10万人あたりの累計感染者数", value: "totalPatientsPerPop", sort: (a, b) => (Number(a) - Number(b)) },
+        { text: "人口密度(人/平方㌖)", value: "popDensity", sort: (a, b) => (Number(a) - Number(b)) }
       ],
       tableData: [],
       populations: populations,
+      landarea: landarea,
+      map: map,
       lastUpdate: ""
     }
   },
@@ -83,6 +88,7 @@ export default {
           place: place,
           population: this.populations[place],
           totalPatients: 0,
+          popDensity: Math.floor(this.populations[place] / this.landarea[place])
         })
       })
     },
@@ -121,39 +127,23 @@ export default {
       }
     },
     getGridMapData () {
-      let placeSequence = [ 
-        "", "あわら市", "", "", 
-        "", "坂井市", "", "", 
-        "", "福井市", "永平寺町", "勝山市",
-        "越前町", "鯖江市", "池田町", "大野市",
-        "", "越前市", "南越前町", "",
-        "高浜町", "若狭町", "敦賀市", "",
-        "おおい町", "小浜市", "美浜町", ""
-      ]
-      let gridMapData = []
-      let row = []
-      placeSequence.forEach(place => {
-        let data = this.tableData.find(d => d.place == place)
-        if (data) {
-          row.push(data)
-        } else {
-          row.push({})
-        }
-        if (row.length == 4) {
-          gridMapData.push(row)
-          row = []
-        }
+      this.map.forEach(row => {
+        row.forEach(city => {
+          let data = this.tableData.find(d => d.place == city.name)
+          if (data) {
+            city.data = data
+          }
+        })
       })
-      if (row.length > 0) {
-        gridMapData.push(row)
-      }
-      return gridMapData
+      return this.map
     },
     getValue (data, field) {
-      return data[field]
+      if (data) {
+        return data[field]
+      }
     },
     getCellStyle (data, field) {
-      if (typeof data[field] === "undefined") {
+      if (!data) {
         return "border: none"
       }
 
@@ -201,7 +191,7 @@ export default {
     margin: 30px auto
     border: 1px silver solid
   .grid
-    max-width: 400px
+    max-width: 500px
     margin: 30px auto
     .grid-caption
       font-weight: bold
@@ -209,8 +199,8 @@ export default {
       border: 1px solid black
       width: 100%
       td
+        width: 14%
         border: 1px solid black
-        width: 16%
         text-align: center
         padding: 3px 0
         &.danger

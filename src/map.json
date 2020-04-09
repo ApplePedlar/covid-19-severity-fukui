@@ -1,0 +1,51 @@
+[
+  [
+    { "name": "" },
+    { "name": "" },
+    { "name": "" },
+    { "name": "あわら市" },
+    { "name": "" },
+    { "name": "" },
+    { "name": "" }
+  ],
+  [
+    { "name": "", "colspan": 2 },
+    { "name": "坂井市", "colspan": 2 },
+    { "name": "永平寺町" },
+    { "name": "勝山市", "colspan": 2 }
+  ],
+  [
+    { "name": "", "colspan": 2 },
+    { "name": "福井市", "colspan": 3},
+    { "name": "大野市", "colspan": 2, "rowspan": 2 }
+  ],
+  [
+    { "name": "", "colspan": 2 },
+    { "name": "越前町" },
+    { "name": "鯖江市" },
+    { "name": "池田町", "rowspan": 2 }
+  ],
+  [
+    { "name": "", "colspan": 2 },
+    { "name": "越前市", "colspan": 2 },
+    { "name": "", "colspan": 2 }
+  ],
+  [
+    { "name": "", "colspan": 3 },
+    { "name": "南越前町", "colspan": 2 },
+    { "name": "", "colspan": 2 }
+  ],
+  [
+    { "name": "高浜町" },
+    { "name": "" },
+    { "name": "美浜町" },
+    { "name": "敦賀市" },
+    { "name": "", "colspan": 3 }
+  ],
+  [
+    { "name": "おおい町" },
+    { "name": "小浜市" },
+    { "name": "若狭町" },
+    { "name": "", "colspan": 4 }
+  ]
+]
