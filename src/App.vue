@@ -94,7 +94,7 @@ export default {
     },
     makeTableData (json) {
         json.forEach(row => {
-          let place = row["患者_居住地"]
+          let place = row["患者_居住地"].trim()
           let data = this.tableData.find(d => d.place === place)
           data.totalPatients++
         })
