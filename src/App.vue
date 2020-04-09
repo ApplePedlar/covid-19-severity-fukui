@@ -59,7 +59,8 @@ export default {
         { text: "市町村", value: "place", width: "90px", sortable: false },
         { text: "累計感染者数", value: "totalPatients" },
         { text: "10万人あたりの累計感染者数", value: "totalPatientsPerPop", sort: (a, b) => (Number(a) - Number(b)) },
-        { text: "人口密度(人/平方㌖)", value: "popDensity", sort: (a, b) => (Number(a) - Number(b)) }
+        { text: "人口密度(人/平方㌖)", value: "popDensity", sort: (a, b) => (Number(a) - Number(b)) },
+        { text: "宅地人口密度(人/平方㌖)", value: "residentialLandPopDensity", sort: (a, b) => (Number(a) - Number(b)) }
       ],
       tableData: [],
       populations: populations,
@@ -69,6 +70,7 @@ export default {
     }
   },
   mounted () {
+    document.querySelector("meta[name='viewport']").setAttribute("content", "width=800")
     this.initTableData()
     axios
       .get(this.sourceUrl)
@@ -88,7 +90,8 @@ export default {
           place: place,
           population: this.populations[place],
           totalPatients: 0,
-          popDensity: Math.floor(this.populations[place] / this.landarea[place])
+          popDensity: Math.floor(this.populations[place] / this.landarea.find(d => d.name === place)["総面積"]),
+          residentialLandPopDensity: Math.floor(this.populations[place] / this.landarea.find(d => d.name === place)["宅地"])
         })
       })
     },
@@ -146,7 +149,7 @@ export default {
       if (!data) {
         return "border: none"
       }
-
+      let min = this.tableData.reduce((acc, cur) => Math.min(acc ? acc : 100000000, Number(cur[field])))
       let mean = this.tableData.reduce((acc, cur) => acc + Number(cur[field]), 0) / this.tableData.length
       let value = Number(this.getValue(data, field))
 
@@ -161,7 +164,7 @@ export default {
           green = blue = 0
         }
       } else {
-        green = blue = 255 - parseInt(value / mean * 128)
+        green = blue = 255 - parseInt((value - min) / mean * 128)
       }
 
       return `background-color: rgb(${red}, ${green}, ${blue})`
@@ -187,7 +190,7 @@ export default {
   .about
     margin: 20px
   .table
-    max-width: 400px
+    max-width: 800px
     margin: 30px auto
     border: 1px silver solid
   .grid
@@ -210,6 +213,8 @@ export default {
         &.alert
           background-color: #FFFFA0
         font-size: 14px
+        @media (max-width: 640px)
+          font-size: 12px
   .credit, .links
     font-size: 12px
     .project-home, .data-source, .link
